@@ -1,1 +1,13 @@
+certifi==2021.10.8
+charset-normalizer==2.0.12
+click==8.1.3
+colorama==0.4.4
+idna==3.3
+playsound==1.3.0
+PyAudio==0.2.11
+requests==2.27.1
+shellingham==1.4.0
+six==1.16.0
 SpeechRecognition==3.8.1
+typer==0.4.1
+urllib3==1.26.9
