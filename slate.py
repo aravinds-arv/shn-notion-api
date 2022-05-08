@@ -68,61 +68,80 @@ def play_sound(text):
         print("could not play sound")
 
 def process_commands(text):
+
     if ADDTASK_COMMAND in text.lower():
-        play_sound("What task so you have in mind?")
+        typer.secho("What task so you have in mind? 🤔", fg=typer.colors.BRIGHT_BLUE)
+        play_sound("What task so you have in mind? 🤔") 
         task = get_audio()
         task = audio_to_text(task)
+        add(task)
         if task:
+            typer.secho(f"Added new task: {task} 🚀", fg=typer.colors.GREEN)
+            print()
             play_sound(f"Added new task: {task}")
-            print()
-            typer.secho(f"Added new task: {task}", fg=typer.colors.BRIGHT_BLUE)
+            
+
     elif DELTASK_COMMAND in text.lower():
-        play_sound("Please specify the ID of the task you want to remove")
+        typer.secho("Please specify the ID of the task you want to remove ❌", fg=typer.colors.BRIGHT_BLUE)
+        play_sound("Please specify the ID of the task you want to remove ❌")
         task = get_audio()
         task = audio_to_text(task)
         task = int(task)
+        remove(task)
         if task:
+            # typer.secho(f"Removed task: {task} ❌", fg=typer.colors.BRIGHT_RED)
+            # print()
             play_sound(f"Removed task: {task}")
-            print()
-            typer.secho(f"Removed task: {task}", fg=typer.colors.BRIGHT_RED)
+
     elif CHKTASK_COMMAND in text.lower():
-        play_sound("Please specify the ID of the task you want to check")
+        typer.secho("Please specify the ID of the task you want to check ✅", fg=typer.colors.BRIGHT_BLUE)
+        play_sound("Please specify the ID of the task you want to check ✅")
         task = get_audio()
         task = audio_to_text(task)
         task = int(task)
+        check(task)
         if task:
+            # typer.secho(f"Checked task: {task} ✅", fg=typer.colors.BRIGHT_YELLOW)
+            # print()
             play_sound(f"Checked task: {task}")
-            print()
-            typer.secho(f"Checked task: {task}", fg=typer.colors.BRIGHT_YELLOW)
+
     elif UNCHKTASK_COMMAND in text.lower():
         play_sound("Please specify the ID of the task you want to uncheck")
+        typer.secho("Please specify the ID of the task you want to uncheck ", fg=typer.colors.BRIGHT_BLUE)
         task = get_audio()
         task = audio_to_text(task)
         task = int(task)
+        uncheck(task)
         if task:
+            # typer.secho(f"Unchecked task: {task}", fg=typer.colors.BRIGHT_YELLOW)
+            # print()
             play_sound(f"Unchecked task: {task}")
-            print()
-            typer.secho(f"Unchecked task: {task}", fg=typer.colors.BRIGHT_YELLOW)
+
     elif LIST_COMMAND in text.lower():
         play_sound("Here's the list of tasks to be completed")
-        typer.secho(f"List of available tasks", fg=typer.colors.BRIGHT_MAGENTA)
+        typer.secho(f"List of available tasks 📃", fg=typer.colors.BRIGHT_MAGENTA)
+        list()
+
     elif HELP_COMMAND in text.lower():
-        play_sound(" Here are the list of available voice commands..")
-        typer.secho("  List of available voice commands", fg=typer.colors.GREEN)
-        typer.secho('''$ slate add - To add a new task to your notion database
-        $ slate remove - To remove an existing task from your notion database
-        $ slate check - To check an existing task in your notion database
-        $ slate uncheck - To uncheck an existing task in your notion database
-        $ slate list - To list all existing unchecked tasks in your notion database
-        $ slate help - To open this help
-        $ slate exit - To exit slate''', fg=typer.colors.BRIGHT_BLUE)
+        # typer.secho("  List of available voice commands", fg=typer.colors.GREEN)
+        # typer.secho('''$ slate add - To add a new task to your notion database
+        # $ slate remove - To remove an existing task from your notion database
+        # $ slate check - To check an existing task in your notion database
+        # $ slate uncheck - To uncheck an existing task in your notion database
+        # $ slate list - To list all existing unchecked tasks in your notion database
+        # $ slate help - To open this help
+        # $ slate exit - To exit slate''', fg=typer.colors.BRIGHT_BLUE)
+        help()
+        play_sound("Here are the list of available voice commands...")
+
     elif EXIT_COMMAND in text.lower():
-        play_sound("Exiting slate..")
-        typer.secho("Exiting Slate..", fg=typer.colors.BRIGHT_MAGENTA)
+        typer.secho("Exiting Slate...👋", fg=typer.colors.BRIGHT_MAGENTA)
+        play_sound("Exiting slate...")
         raise typer.Exit()
+
     else:
+        typer.secho("🙉 That is an unrecognised command, try saying 'slate help'", fg=typer.colors.BRIGHT_MAGENTA)
         play_sound("That is an unrecognised command, try saying 'slate help' to see all available commands")
-        typer.secho("That is an unrecognised command, try saying 'slate help'", fg=typer.colors.BRIGHT_MAGENTA)
 
 @app.command()
 def add(task : str):
@@ -130,7 +149,7 @@ def add(task : str):
     now = datetime.now().astimezone().isoformat()
     res = client.create_page(task_id, task, now, status=False)
     if res.status_code == 200:
-            typer.secho(f"Added new task: {task}", fg=typer.colors.BRIGHT_GREEN)
+            typer.secho(f"Added new task: {task} 🚀", fg=typer.colors.BRIGHT_GREEN)
             task_id += 1
             store_last_task_id(ID_FILE_NAME, task_id)
 
@@ -144,9 +163,9 @@ def remove(task_num: int):
     if task_id:
         res = client.delete_page(task_id)
         if res.status_code == 200:
-            typer.secho(f"Removed task: {task_id}", fg=typer.colors.BRIGHT_GREEN)
+            typer.secho(f"Removed task: {task_id} ❌", fg=typer.colors.BRIGHT_GREEN)
     else:
-        typer.secho("That task doesn't seem to exist", fg=typer.colors.BRIGHT_RED)
+        typer.secho("That task doesn't seem to exist 🙈", fg=typer.colors.BRIGHT_RED)
 
 @app.command()
 def check(task_num: int):
@@ -158,9 +177,9 @@ def check(task_num: int):
     if task_id:
         res = client.update_page(task_id, status=True)
         if res.status_code == 200:
-            typer.secho(f"Checked task: {task_id}", fg=typer.colors.BRIGHT_GREEN)
+            typer.secho(f"Checked task: {task_id} ✅", fg=typer.colors.BRIGHT_GREEN)
     else:
-        typer.secho("That task doesn't seem to exist", fg=typer.colors.BRIGHT_RED)
+        typer.secho("That task doesn't seem to exist 🙈", fg=typer.colors.BRIGHT_RED)
 
 @app.command()
 def uncheck(task_num: int):
@@ -174,7 +193,7 @@ def uncheck(task_num: int):
         if res.status_code == 200:
             typer.secho(f"Unchecked task: {task_id}", fg=typer.colors.BRIGHT_GREEN)
     else:
-        typer.secho("That task doesn't seem to exist", fg=typer.colors.BRIGHT_RED)
+        typer.secho("That task doesn't seem to exist 🙈", fg=typer.colors.BRIGHT_RED)
 
 @app.command()
 def list():
