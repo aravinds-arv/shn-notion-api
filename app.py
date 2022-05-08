@@ -1,10 +1,60 @@
 import typer
-import speech_recognition as sr
-import gtts
-from playsound import playsound
+from datetime import datetime
+from notion import NotionClient
+from config import TOKEN,DATABASE_ID
+# import speech_recognition as sr
+# import gtts
+# from playsound import playsound
 
 app = typer.Typer()
-r = sr.Recognizer()
+# r = sr.Recognizer()
+
+client = NotionClient(TOKEN, DATABASE_ID)
+
+@app.command()
+def createtask(task : str):
+
+    now = datetime.now().astimezone().isoformat()
+    res = client.create_page(task, now, status="Active")
+    if res.status_code == 200:
+            typer.secho(f"Added new task: {task}", fg=typer.colors.BRIGHT_GREEN)
+            
+            
+# @app.command()
+# def deletetask():
+#     for row in cv.collection.get_rows():
+#         row.remove(permanently=False)
+
+# @app.command()
+# def completed():
+#     # newchild.checked = True
+# # if(task_completed):  
+#     pass 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ADDTASK_COMMAND = "add"
 DELTASK_COMMAND = "remove"

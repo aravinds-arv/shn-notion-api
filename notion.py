@@ -19,17 +19,8 @@ class NotionClient:
         create_url = "https://api.notion.com/v1/pages"
 
         data = {
-        "parent": { "database": self.database },
+        "parent": { "database_id": self.database_id },
         "properties": {
-            "NO": {
-                "number": [
-                    {
-                        "text": {
-                            "content": description
-                        }
-                    }
-                ]
-            },
             "Description": {
                 "title": [
                     {
@@ -49,7 +40,7 @@ class NotionClient:
                 "rich_text": [
                     {
                         "text": {
-                            "content": description
+                            "content": status
                         }
                     }
                 ]
@@ -59,5 +50,5 @@ class NotionClient:
 
         data = json.dumps(data)
         res = requests.post(create_url,headers=self.headers,data=data)
-        print(res.status_code)
+        # print(res.status_code)
         return res
