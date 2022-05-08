@@ -1,4 +1,7 @@
-# shn-notion-api
+# Slate
+
+Tasks are powerful and important to track your progress. However, creating a task in a meeting, at your desk and on the go can take time and effort.<br>
+Slate lets you create tasks quickly with a simple command line command directly into notion, without logging into your account. 🚀
 
 ## Adding Tasks
 ![task](thumbnails/task.png)
