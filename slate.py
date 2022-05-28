@@ -1,4 +1,6 @@
 import os
+import sys
+import time
 import gtts
 import typer
 import speech_recognition as sr
@@ -20,7 +22,12 @@ LIST_COMMAND = "list"
 HELP_COMMAND = "help"
 EXIT_COMMAND = "close"
 
+# ? some numbers that speech recognition gets wrong every time 🥲
+ALT_WORDS = {('what','want', 'one'): 1, ('tu','two'):2, ('tree','three'):3, ('sex'):6}
+
 ID_FILE_NAME = "last_task_id.txt"
+
+os.close(sys.stderr.fileno())
 
 def retreive_last_task_id(file_name):
     f_read = open(file_name, 'r')
@@ -71,8 +78,9 @@ def play_sound(text):
 def process_commands(text):
 
     if ADDTASK_COMMAND in text.lower():
-        typer.secho("What task so you have in mind? 🤔", fg=typer.colors.BRIGHT_BLUE)
-        play_sound("What task so you have in mind?") 
+        typer.secho("-> You said 'create'", fg=typer.colors.BRIGHT_YELLOW)
+        typer.secho("What task do you have in mind? 🤔", fg=typer.colors.BRIGHT_BLUE)
+        play_sound("What task do you have in mind?") 
         task = get_audio()
         task = audio_to_text(task)
         if task:
@@ -82,6 +90,7 @@ def process_commands(text):
             
 
     elif DELTASK_COMMAND in text.lower():
+        typer.secho("-> You said 'remove'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho("Please specify the ID of the task you want to remove ❌", fg=typer.colors.BRIGHT_BLUE)
         play_sound("Please specify the ID of the task you want to remove")
         task = get_audio()
@@ -89,7 +98,7 @@ def process_commands(text):
         try:
             task = int(task)
         except:
-            alt_words = {('what','want', 'one'): 1, ('tu','two'):2, ('tree','three'):3}
+            alt_words = ALT_WORDS
             for key, value in alt_words.items():
                 if str(task).lower() in key:
                     task = value
@@ -101,6 +110,7 @@ def process_commands(text):
             play_sound(f"Removed task: {task}")
 
     elif CHKTASK_COMMAND in text.lower():
+        typer.secho("-> You said 'check'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho("Please specify the ID of the task you want to check ✅", fg=typer.colors.BRIGHT_BLUE)
         play_sound("Please specify the ID of the task you want to check")
         task = get_audio()
@@ -108,7 +118,7 @@ def process_commands(text):
         try:
             task = int(task)
         except:
-            alt_words = {('what','want', 'one'): 1, ('tu','two'):2, ('tree','three'):3}
+            alt_words = ALT_WORDS
             for key, value in alt_words.items():
                 if str(task).lower() in key:
                     task = value
@@ -119,6 +129,7 @@ def process_commands(text):
             play_sound(f"Checked task: {task}")
 
     elif UNCHKTASK_COMMAND in text.lower():
+        typer.secho("-> You said 'undo'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho("Please specify the ID of the task you want to uncheck", fg=typer.colors.BRIGHT_BLUE)
         play_sound("Please specify the ID of the task you want to uncheck")
         task = get_audio()
@@ -126,7 +137,7 @@ def process_commands(text):
         try:
             task = int(task)
         except:
-            alt_words = {('what','want', 'one'): 1, ('tu','two'):2, ('tree','three'):3}
+            alt_words = ALT_WORDS
             for key, value in alt_words.items():
                 if str(task).lower() in key:
                     task = value
@@ -137,24 +148,27 @@ def process_commands(text):
             play_sound(f"Unchecked task: {task}")
 
     elif LIST_COMMAND in text.lower():
+        typer.secho("-> You said 'list'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho(f"List of available tasks 📃", fg=typer.colors.BRIGHT_MAGENTA)
         list()
         print()
         play_sound("Here's the list of tasks to be completed")
 
     elif HELP_COMMAND in text.lower():
+        typer.secho("-> You said 'help'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho("  List of available voice commands", fg=typer.colors.GREEN)
-        typer.secho('''$ add - To add a new task to your notion database
+        typer.secho('''$ create - To add a new task to your notion database
 $ remove - To remove an existing task from your notion database
 $ check - To check an existing task in your notion database
 $ undo - To uncheck an existing task in your notion database
-$ list - To list all existing unchecked tasks in your notion database
+$ list - To list all existing tasks in your notion database
 $ help - To open this help
 $ close - To exit slate''', fg=typer.colors.BRIGHT_BLUE)
         print()
         play_sound("Here are the list of available voice commands...")
 
     elif EXIT_COMMAND in text.lower():
+        typer.secho("-> You said 'close'", fg=typer.colors.BRIGHT_YELLOW)
         typer.secho("Exiting Slate...👋", fg=typer.colors.BRIGHT_MAGENTA)
         play_sound("Exiting slate...")
         raise typer.Exit()
@@ -224,7 +238,11 @@ def list():
         status = 'not done'
         if r['status'] == True:
             status = 'done'
-        print(f"{r['task_num']} {r['description']} {status}")
+            status = typer.style(f"{status}", fg=typer.colors.BRIGHT_BLUE)
+        else:
+            status = typer.style(f"{status}", fg=typer.colors.BRIGHT_RED)
+        task = typer.style(f"-> {r['task_num']} {r['description']} - ", fg=typer.colors.WHITE)
+        typer.secho(task + status)
 
 @app.command()
 def help():
@@ -235,7 +253,7 @@ $ python slate.py add [TASK]- To add a new task to your notion database
 $ python slate.py remove [TASK_NUM]- To remove an existing task from your notion database
 $ python slate.py check [TASK_NUM]- To check an existing task in your notion database
 $ python slate.py uncheck [TASK_NUM]- To uncheck an existing task in your notion database
-$ python slate.py list - To list all existing unchecked tasks in your notion database
+$ python slate.py list - To list all existing tasks in your notion database
 $ python slate.py help - To open this help''', fg=typer.colors.BRIGHT_BLUE)
 
 @app.callback(invoke_without_command=True)
@@ -253,10 +271,15 @@ def main(ctx: typer.Context):
     ''',  fg=typer.colors.WHITE)
         typer.echo(banner)
         typer.secho('''                     《《Get things done with Slate..! 》》''', fg=typer.colors.BRIGHT_YELLOW,  bold=True)
-    while True:
-        a = get_audio_init()
-        text = audio_to_text(a)
-        process_commands(text)
+
+    if(len(sys.argv) <= 1):
+        print()
+        typer.secho("Initializing speech recognition..", fg=typer.colors.BRIGHT_YELLOW)
+        time.sleep(2)
+        while True:
+            a = get_audio_init()
+            text = audio_to_text(a)
+            process_commands(text)
 
 if __name__ == "__main__":
     app()
